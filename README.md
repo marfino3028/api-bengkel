@@ -80,16 +80,36 @@ Cek cepat: `GET http://localhost:8000/api/health` → `{"status":"ok"}`.
 
 ---
 
-## 🌐 Custom Domain via Cloudflare (subdomain `api`)
+## 🌐 Custom Domain via Cloudflare — `apibengkel.hamztech.my.id`
 
-Ekosistem butuh **3 subdomain** (lihat juga README web & cms). Untuk API gunakan **`api`**:
+API ini dipasang di subdomain **`apibengkel.hamztech.my.id`** (Railway). Prasyarat: domain `hamztech.my.id` sudah aktif di Cloudflare.
 
-1. **Railway** → service API → *Settings* → *Networking* → **Custom Domain** → ketik `api.domainmu.com`. Railway menampilkan target CNAME, mis. `xxxx.up.railway.app`.
-2. **Cloudflare** → domainmu → **DNS** → **Add record**:
-   - Type `CNAME` · Name `api` · Target `xxxx.up.railway.app` (dari Railway)
-   - Proxy status: **DNS only** (abu-abu) sampai SSL Railway terbit, lalu boleh **Proxied** (oranye).
-3. Tunggu Railway verifikasi domain (SSL otomatis). API di `https://api.domainmu.com`.
-4. Set `APP_URL=https://api.domainmu.com`, dan di frontend set `NUXT_PUBLIC_API_BASE=https://api.domainmu.com/api`.
+**Langkah 1 — Railway:** service API → **Settings** → **Networking** → **Custom Domain** → ketik `apibengkel.hamztech.my.id` → **Add Domain**. Salin target CNAME yang ditampilkan (mis. `abcd1234.up.railway.app`).
+
+**Langkah 2 — Cloudflare DNS** (`hamztech.my.id` → DNS → Add record):
+
+| Type | Name | Target | Proxy | TTL |
+|---|---|---|---|---|
+| `CNAME` | `apibengkel` | `abcd1234.up.railway.app` *(dari Railway)* | **DNS only** (abu-abu) | Auto |
+
+> Wajib **DNS only** dulu agar Railway bisa menerbitkan SSL. Setelah aktif boleh diubah ke **Proxied** + SSL/TLS mode **Full (strict)**.
+
+**Langkah 3 — Tes:** `https://apibengkel.hamztech.my.id/api/health` → `{"status":"ok"}`.
+
+**Langkah 4 — Variables Railway:**
+```
+APP_URL=https://apibengkel.hamztech.my.id
+FRONTEND_URLS=https://webbengkel.hamztech.my.id,https://cmsbengkel.hamztech.my.id
+```
+
+### 🗺️ Peta domain produksi
+| Subdomain | Tujuan | Platform |
+|---|---|---|
+| `apibengkel.hamztech.my.id` | API Laravel (repo ini) | **Railway** |
+| `webbengkel.hamztech.my.id` | Website publik | Koyeb |
+| `cmsbengkel.hamztech.my.id` | Panel admin | Koyeb |
+
+Konfigurasi penghubung: web & CMS set `NUXT_PUBLIC_API_BASE=https://apibengkel.hamztech.my.id/api`; Midtrans Notification URL = `https://apibengkel.hamztech.my.id/api/payments/notification`; mobile build dengan `--dart-define=API_BASE_URL=https://apibengkel.hamztech.my.id/api`.
 
 ---
 
@@ -105,7 +125,7 @@ Mendukung **Midtrans Snap** untuk order & booking. Tanpa konfigurasi, endpoint p
 
 1. Daftar di [dashboard.midtrans.com](https://dashboard.midtrans.com) → ambil **Server Key** & **Client Key** (Sandbox dulu).
 2. Set env: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `MIDTRANS_IS_PRODUCTION=false`.
-3. Set **Payment Notification URL** di Midtrans → `https://<domain-api>/api/payments/notification`.
+3. Set **Payment Notification URL** di Midtrans → `https://apibengkel.hamztech.my.id/api/payments/notification`.
 
 Endpoint: `POST /api/orders/{code}/pay` & `POST /api/bookings/{code}/pay` (auth) → `{ snap_token, redirect_url, client_key }`. Webhook `POST /api/payments/notification` (publik, diverifikasi signature SHA-512) → otomatis menandai lunas + memicu notifikasi WhatsApp.
 
