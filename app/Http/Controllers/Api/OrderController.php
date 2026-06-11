@@ -33,6 +33,7 @@ class OrderController extends Controller
             'fulfillment' => ['required', 'in:pickup,delivery'],
             'shipping_address' => ['required_if:fulfillment,delivery', 'nullable', 'string', 'max:500'],
             'payment_method' => ['required', 'in:cash,transfer'],
+            'payment_gateway' => ['nullable', 'in:manual,midtrans'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -52,6 +53,7 @@ class OrderController extends Controller
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
                 'payment_method' => $data['payment_method'],
+                'payment_gateway' => $data['payment_gateway'] ?? 'manual',
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -93,6 +95,8 @@ class OrderController extends Controller
 
             return $order;
         });
+
+        app(\App\Services\NotificationService::class)->orderCreated($order);
 
         return new OrderResource($order->load('items'));
     }

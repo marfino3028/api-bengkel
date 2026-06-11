@@ -72,6 +72,8 @@ class BookingController extends Controller
             return $booking;
         });
 
+        app(\App\Services\NotificationService::class)->bookingCreated($booking);
+
         return new BookingResource($booking->load('items'));
     }
 

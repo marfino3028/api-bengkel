@@ -99,5 +99,25 @@ Prefix semua: `/api` (detail di [`API_CONTRACT.md`](API_CONTRACT.md)).
 - Pelanggan (Bearer): `GET/POST /bookings`, `GET/POST /orders`, `GET /auth/me`, `PUT /auth/profile`.
 - Admin (Bearer, role admin): `GET /admin/dashboard`, `apiResource` products/categories/services/banners, kelola `/admin/bookings` & `/admin/orders`, `/admin/customers`, `/admin/settings`, `POST /admin/upload`.
 
+## 💳 Pembayaran Online (Midtrans)
+
+Mendukung **Midtrans Snap** untuk order & booking. Tanpa konfigurasi, endpoint pembayaran mengembalikan 422 yang ramah (fallback ke pembayaran manual) sehingga app tetap jalan.
+
+1. Daftar di [dashboard.midtrans.com](https://dashboard.midtrans.com) → ambil **Server Key** & **Client Key** (Sandbox dulu).
+2. Set env: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `MIDTRANS_IS_PRODUCTION=false`.
+3. Set **Payment Notification URL** di Midtrans → `https://<domain-api>/api/payments/notification`.
+
+Endpoint: `POST /api/orders/{code}/pay` & `POST /api/bookings/{code}/pay` (auth) → `{ snap_token, redirect_url, client_key }`. Webhook `POST /api/payments/notification` (publik, diverifikasi signature SHA-512) → otomatis menandai lunas + memicu notifikasi WhatsApp.
+
+## 🔔 Notifikasi WhatsApp
+
+Otomatis saat: booking dibuat, order dibuat, status berubah, pembayaran lunas. Pakai gateway **Fonnte** (atau kompatibel). Tanpa token → di-skip diam-diam (app tetap normal).
+
+- Set env: `WHATSAPP_TOKEN` (dari [fonnte.com](https://fonnte.com)), opsional `WHATSAPP_ADMIN_NUMBER` (notifikasi internal admin).
+
+## 🤖 CI/CD (GitHub Actions)
+- `.github/workflows/ci.yml` — test PHP otomatis tiap push/PR (PHP 8.2 + SQLite).
+- `.github/workflows/deploy.yml` — deploy ke Railway (opsional; set secret `RAILWAY_TOKEN` & `RAILWAY_SERVICE`). Alternatif termudah: aktifkan auto-deploy native Railway dari GitHub.
+
 ## 🛠️ Stack
-Laravel 12 · PHP 8.2 · Sanctum · MySQL · API Resources.
+Laravel 12 · PHP 8.2 · Sanctum · MySQL · Midtrans · API Resources.

@@ -1,0 +1,37 @@
+name: Deploy to Railway
+
+# Auto-deploy saat push ke main.
+# Catatan: Railway juga mendukung auto-deploy native (hubungkan repo di dashboard).
+# Workflow ini opsional — jalan hanya bila secret RAILWAY_TOKEN di-set.
+# Set di repo Settings > Secrets and variables > Actions:
+#   RAILWAY_TOKEN   = token project Railway (Project Settings > Tokens)
+#   RAILWAY_SERVICE = nama service API di Railway (mis. "api-bengkel")
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cek konfigurasi
+        id: cfg
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::RAILWAY_TOKEN belum di-set — deploy dilewati."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.skip != 'true'
+
+      - name: Install Railway CLI
+        if: steps.cfg.outputs.skip != 'true'
+        run: npm i -g @railway/cli
+
+      - name: Deploy
+        if: steps.cfg.outputs.skip != 'true'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service "${{ secrets.RAILWAY_SERVICE }}" --detach

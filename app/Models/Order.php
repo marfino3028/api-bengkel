@@ -10,6 +10,7 @@ class Order extends Model
         'order_code', 'user_id', 'customer_name', 'customer_phone',
         'fulfillment', 'shipping_address', 'subtotal', 'shipping_cost', 'total',
         'status', 'payment_status', 'payment_method', 'paid_at', 'notes',
+        'payment_gateway', 'snap_token', 'payment_reference',
     ];
 
     protected $casts = [

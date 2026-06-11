@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,6 +25,9 @@ Route::get('/services', [CatalogController::class, 'services']);
 Route::get('/services/{slug}', [CatalogController::class, 'service']);
 Route::get('/banners', [CatalogController::class, 'banners']);
 Route::get('/settings', [CatalogController::class, 'settings']);
+
+// Webhook Midtrans (dipanggil server Midtrans, diverifikasi via signature)
+Route::post('/payments/notification', [PaymentController::class, 'notification']);
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +50,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{code}', [OrderController::class, 'show']);
     Route::post('/orders/{code}/cancel', [OrderController::class, 'cancel']);
+
+    // Pembayaran online (Midtrans Snap)
+    Route::post('/orders/{code}/pay', [PaymentController::class, 'payOrder']);
+    Route::post('/bookings/{code}/pay', [PaymentController::class, 'payBooking']);
 });
 
 /*

@@ -28,6 +28,7 @@ class BookingResource extends JsonResource
             'grand_total' => (float) $this->grand_total,
             'payment_status' => $this->payment_status,
             'payment_method' => $this->payment_method,
+            'payment_gateway' => $this->payment_gateway,
             'paid_at' => $this->paid_at,
             'items' => BookingItemResource::collection($this->whenLoaded('items')),
             'customer' => new UserResource($this->whenLoaded('user')),

@@ -47,6 +47,8 @@ class BookingController extends Controller
 
         $booking->update($data);
 
+        app(\App\Services\NotificationService::class)->bookingStatusChanged($booking);
+
         return new BookingResource($booking->load(['items', 'user']));
     }
 
@@ -122,6 +124,11 @@ class BookingController extends Controller
             'payment_method' => $data['payment_method'] ?? $booking->payment_method,
             'paid_at' => $data['payment_status'] === 'paid' ? Carbon::now() : null,
         ]);
+
+        if ($data['payment_status'] === 'paid') {
+            app(\App\Services\NotificationService::class)
+                ->paymentPaid($booking->booking_code, $booking->customer_phone, $booking->grand_total);
+        }
 
         return new BookingResource($booking->load(['items', 'user']));
     }

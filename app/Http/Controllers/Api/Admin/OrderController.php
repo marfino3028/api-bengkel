@@ -54,6 +54,8 @@ class OrderController extends Controller
             $order->update($data);
         }
 
+        app(\App\Services\NotificationService::class)->orderStatusChanged($order);
+
         return new OrderResource($order->load(['items', 'user']));
     }
 
@@ -69,6 +71,11 @@ class OrderController extends Controller
             'payment_method' => $data['payment_method'] ?? $order->payment_method,
             'paid_at' => $data['payment_status'] === 'paid' ? Carbon::now() : null,
         ]);
+
+        if ($data['payment_status'] === 'paid') {
+            app(\App\Services\NotificationService::class)
+                ->paymentPaid($order->order_code, $order->customer_phone, $order->total);
+        }
 
         return new OrderResource($order->load(['items', 'user']));
     }

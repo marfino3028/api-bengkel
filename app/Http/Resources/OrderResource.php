@@ -23,6 +23,7 @@ class OrderResource extends JsonResource
             'status' => $this->status,
             'payment_status' => $this->payment_status,
             'payment_method' => $this->payment_method,
+            'payment_gateway' => $this->payment_gateway,
             'paid_at' => $this->paid_at,
             'notes' => $this->notes,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),

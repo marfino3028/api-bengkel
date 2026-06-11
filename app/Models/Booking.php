@@ -12,6 +12,7 @@ class Booking extends Model
         'scheduled_at', 'complaint', 'admin_notes', 'status',
         'service_total', 'parts_total', 'grand_total',
         'payment_status', 'payment_method', 'paid_at',
+        'payment_gateway', 'snap_token', 'payment_reference',
     ];
 
     protected $casts = [
